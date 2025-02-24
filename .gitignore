@@ -1,0 +1,10 @@
+**/__pycache__
+
+Lib
+Include
+Scripts
+run-config-env.bat
+pyvenv.cfg
+
+
+test-data/**
