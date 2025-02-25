@@ -13,7 +13,7 @@ logger = logging.getLogger('basicLogger')
 
 class ImageContainer(tk.Frame):
   def __init__(self, parent, *args, **kwargs):
-    tk.Frame.__init__(self, parent, *args, **kwargs)
+    tk.Frame.__init__(self, parent, *args, **kwargs,  height=f"{AppConfig.MAX_SIZE}", width=f"{AppConfig.MAX_SIZE}")
 
     self.stegoimage = None
     self.image_container = None
@@ -42,22 +42,30 @@ class ImageContainer(tk.Frame):
       # print('l,w:', l, ' ', w, ', max size:', AppConfig.MAX_SIZE)
       new_l = l
       new_w = w
-      if l > AppConfig.MAX_SIZE or w > AppConfig.MAX_SIZE:
-        if l > AppConfig.MAX_SIZE:
-          aspect_ratio = l / w
-          new_l = int(AppConfig.MAX_SIZE)
-          new_w = int(AppConfig.MAX_SIZE / aspect_ratio)
-        else:
-          aspect_ratio = w / l
-          new_l = int(AppConfig.MAX_SIZE / aspect_ratio)
-          new_w = int(AppConfig.MAX_SIZE)
+      # if l > AppConfig.MAX_SIZE or w > AppConfig.MAX_SIZE:
+      #   if l > AppConfig.MAX_SIZE:
+      #     aspect_ratio = l / w
+      #     new_l = int(AppConfig.MAX_SIZE)
+      #     new_w = int(AppConfig.MAX_SIZE / aspect_ratio)
+      #   else:
+      #     aspect_ratio = w / l
+      #     new_l = int(AppConfig.MAX_SIZE / aspect_ratio)
+      #     new_w = int(AppConfig.MAX_SIZE)
+      if l > w:
+        aspect_ratio = l / w
+        new_l = int(AppConfig.MAX_SIZE)
+        new_w = int(AppConfig.MAX_SIZE / aspect_ratio)
+      else:
+        aspect_ratio = w / l
+        new_l = int(AppConfig.MAX_SIZE / aspect_ratio)
+        new_w = int(AppConfig.MAX_SIZE)
 
       if new_w != w or new_l != l:
         logger.debug(f'resize: {l}x{w} -> {new_l}x{new_w}')
       widget_image = widget_image.resize((new_l, new_w), Image.Resampling.LANCZOS)
 
-      self.image_container = ImageTk.PhotoImage(widget_image)
-      self.label = tk.Label(self, image=self.image_container, height=f"{AppConfig.MAX_SIZE}", width=f"{AppConfig.MAX_SIZE}")
+      self.image_container = ImageTk.PhotoImage(widget_image,  height=f"{AppConfig.MAX_SIZE}", width=f"{AppConfig.MAX_SIZE}")
+      self.label = tk.Label(self, image=self.image_container,  height=f"{AppConfig.MAX_SIZE}", width=f"{AppConfig.MAX_SIZE}")
       self.label.pack(side="left")
 
       # calculate number of bits for global
