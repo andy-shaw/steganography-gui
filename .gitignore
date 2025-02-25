@@ -5,6 +5,10 @@ Include
 Scripts
 run-config-env.bat
 pyvenv.cfg
-
+build
+dist
 
 test-data/**
+*.spec
+
+.env
