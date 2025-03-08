@@ -2,7 +2,8 @@ import SignalBus
 
 UNSAVED = False
 IMAGE_LOADED = False
-NUM_BITS = 0
+NUM_BITS = 0 #updated in code
+
 
 def set_unsaved(val):
   global UNSAVED

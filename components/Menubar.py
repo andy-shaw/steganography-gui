@@ -25,6 +25,8 @@ class Menubar(tk.Menu):
   def bind_signals(self):
     SignalBus.SIG_IMAGE_LOADED.bind(self.handle_open_image)
     SignalBus.SIG_IMAGE_UNLOADED.bind(self.handle_close_image)
+    SignalBus.SIG_SCRUB.bind(lambda: self.file_menu.entryconfigure(1, state="normal"))
+
 
   def handle_open_image(self):
     self.file_menu.entryconfigure(1, state="normal")

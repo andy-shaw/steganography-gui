@@ -2,11 +2,9 @@ from PIL import Image
 import os
 import sys
 import math
+import utils
 
-import logging
-import logging.config
-logging.config.fileConfig('loggers.conf')
-logger = logging.getLogger('basicLogger')
+logger = utils.generate_logger()
 
 META_OFFSET = 75 # characters
 
@@ -38,6 +36,7 @@ class StegoImage:
       self.open_image()
     else:
       logger.debug(f"image path not found: {self.path}")
+      pass
 
   def open_image(self):
     '''load image into object'''
@@ -53,9 +52,11 @@ class StegoImage:
         logger.info(f"{l}px by {w}px, {l*w} total pixels, {l*w*3} total bits, {int((l*w*3 - META_OFFSET) / 8 )} ascii chars")
 
       except:
-        logger.error("Error: path is not an image")
+        # logger.error("Error: path is not an image")
+        pass
     else:
       logger.error("Error: file not found")
+      pass
 
   def close_image(self):
     self.image.save()
@@ -105,20 +106,21 @@ class StegoImage:
     if self.image == None:
       return
 
-    logger.debug('writing:"' + text[:55] + ('...' if len(text) > 55 else '') + '" to image')
+    # logger.debug('writing:"' + text[:55] + ('...' if len(text) > 55 else '') + '" to image')
 
 
     #calculate meta
     meta: str = self.meta['version'] + ';'
     meta += f'{META_OFFSET * 8 + len(text) * 8};'
     meta += f'{self.encoding};'
-    logger.debug(f"meta to embed: '{meta}'")
+    # logger.debug(f"meta to embed: '{meta}'")
 
     ascii_bits = str(meta.ljust(META_OFFSET) + text).encode('ascii', errors='replace') # uses '?' for non-ascii chars
     bits = bin(int.from_bytes(ascii_bits, 'big'))
     self.num_bits = len(bits)
 
     logger.info(f"{len(bits)} bits to embed in image using {math.ceil(len(bits) / 3)} pixels")
+    print(bits)
 
     self.clean_image(self.num_bits)
 
@@ -243,6 +245,7 @@ class StegoImage:
         j += 1
       i += 1
 
+    self.num_bits = len(bits)
     n = int('0b' + bits, 2)
     text = n.to_bytes((n.bit_length() + 7) // 8, 'big').decode('ascii', errors='replace')
 
@@ -266,10 +269,10 @@ if __name__ == '__main__':
 
   logger.debug("starting")
 
-  stego = StegoImage('.\\image.png')
+  stego = StegoImage('.\\test-data\\image.png')
   # stego.clean_image()
   stego.write_text('DEBUG_TEXT')
-  # stego.preview.show()
+  stego.preview.show()
   stego.extract_meta()
   # print(stego.read_text())
   assert stego.read_text() == 'DEBUG_TEXT'
