@@ -41,13 +41,15 @@ class StegoImage:
   def open_image(self):
     '''load image into object'''
     logger.info(f"loading path: {self.path}")
-    self.image = None
-    self.preview = None
+    self.image: Image = None
+    self.preview: Image = None
     if os.path.exists(self.path):
       try:
-        self.image = Image.open(self.path)
-        self.preview = self.image.copy()
+        self.image: Image = Image.open(self.path)
+        self.preview: Image = self.image.copy()
 
+        l: int = 0
+        w: int = 0
         l,w = self.image.size
         logger.info(f"{l}px by {w}px, {l*w} total pixels, {l*w*3} total bits, {int((l*w*3 - META_OFFSET) / 8 )} ascii chars")
 
@@ -62,20 +64,22 @@ class StegoImage:
     self.image.save()
     self.image.close()
 
-  def clean_image(self, num_bits = None):
+  def clean_image(self, num_bits: int = None):
     '''sets the least significant bit to 0 of each RGB value in the image'''
     if self.image == None:
       return
+
+    logger.debug(f"clean_image, num_bits:{num_bits}")
 
     l, w = self.image.size
 
     if num_bits == None:
       num_bits = l * w * 3
 
-    b_index = 0
-    i = 0
+    b_index: int = 0
+    i: int = 0
     while i < l and b_index < num_bits:
-      j = 0
+      j: int = 0
       while j < w and b_index < num_bits:
         r,g,b,a = self.image.getpixel((i,j))
         b_index += 3
@@ -89,7 +93,7 @@ class StegoImage:
         j += 1
       i += 1
 
-  def _detemine_bit(self, color, index, binary_string):
+  def _detemine_bit(self, color: int, index: int, binary_string: str):
     '''add to passed in color value'''
     if index >= len(binary_string):
       return color
@@ -100,7 +104,7 @@ class StegoImage:
     # bit value is 0
     return color
 
-  def write_text(self, text, encoding="ascii"):
+  def write_text(self, text: str, encoding: str="ascii"):
     '''calc bit array and write to picture'''
 
     if self.image == None:
@@ -115,12 +119,12 @@ class StegoImage:
     meta += f'{self.encoding};'
     # logger.debug(f"meta to embed: '{meta}'")
 
-    ascii_bits = str(meta.ljust(META_OFFSET) + text).encode('ascii', errors='replace') # uses '?' for non-ascii chars
-    bits = bin(int.from_bytes(ascii_bits, 'big'))
+    ascii_bits: str = str(meta.ljust(META_OFFSET) + text).encode('ascii', errors='replace') # uses '?' for non-ascii chars
+    bits: int = bin(int.from_bytes(ascii_bits, 'big'))
     self.num_bits = len(bits)
 
     logger.info(f"{len(bits)} bits to embed in image using {math.ceil(len(bits) / 3)} pixels")
-    print(bits)
+    # print(bits)
 
     self.clean_image(self.num_bits)
 
@@ -146,13 +150,14 @@ class StegoImage:
         j += 1
       i += 1
 
-    self.show_used_space(len(bits))
+    self.render_preview(len(bits))
 
-  def show_used_space(self, num_bits):
+  def render_preview(self, num_bits: int):
     self.preview = self.image.copy()
-    b_index = 0
+    b_index: int = 0
     l,w = self.preview.size
-    i = 0
+    i: int = 0
+    j: int = 0
     while i < l and b_index < num_bits:
       j = 0
       while j < w and b_index < num_bits:
@@ -176,15 +181,15 @@ class StegoImage:
       return
 
     # read in meta bits
-    b_index = 0
-    meta_bits = META_OFFSET * 8
-    i = 0
+    b_index: int = 0
+    meta_bits: int = META_OFFSET * 8
+    i: int = 0
     l, w = self.image.size
 
-    bits = ''
+    bits: str = ''
 
     while i < l and b_index < meta_bits:
-      j = 0
+      j: int = 0
       while j < w and b_index < meta_bits:
         r,g,b,a = self.image.getpixel((i,j))
 
@@ -203,8 +208,8 @@ class StegoImage:
         j += 1
       i += 1
 
-    n = int('0b' + bits, 2)
-    meta = n.to_bytes((n.bit_length() + 7) // 8, 'big').decode('ascii', errors='replace')
+    n: int = int('0b' + bits, 2)
+    meta: str = n.to_bytes((n.bit_length() + 7) // 8, 'big').decode('ascii', errors='replace')
 
     logger.debug("extracted meta: " + meta)
     meta = meta.split(';')
@@ -223,11 +228,11 @@ class StegoImage:
     self.extract_meta()
 
     # generate byte array
-    bits = ''
+    bits: str = ''
     l,w = self.image.size
-    i = 0
+    i: int = 0
     while i < l and len(bits) < self.num_bits:
-      j = 0
+      j: int = 0
       while j < w and len(bits) < self.num_bits:
 
         r,g,b,a = self.image.getpixel((i,j))
@@ -253,7 +258,7 @@ class StegoImage:
 
 
 
-DEBUG_TEXT = '''Lorem ipsum odor amet, consectetuer adipiscing elit. Nostra eros mi neque hendrerit blandit. Justo odio elit dolor augue maecenas cursus lectus. Montes fusce tempus platea fusce leo. Montes iaculis viverra porttitor hendrerit nisi egestas eleifend lorem. Tellus phasellus parturient dis purus mattis, eleifend mauris rhoncus? Condimentum egestas nibh ligula lorem ultricies phasellus; senectus adipiscing. Nisl ad gravida ad rutrum suspendisse curabitur duis aliquet. Eros feugiat eget euismod interdum congue orci aptent nullam. Nam hac aenean conubia accumsan aliquet turpis vivamus nam.
+DEBUG_TEXT: str = '''Lorem ipsum odor amet, consectetuer adipiscing elit. Nostra eros mi neque hendrerit blandit. Justo odio elit dolor augue maecenas cursus lectus. Montes fusce tempus platea fusce leo. Montes iaculis viverra porttitor hendrerit nisi egestas eleifend lorem. Tellus phasellus parturient dis purus mattis, eleifend mauris rhoncus? Condimentum egestas nibh ligula lorem ultricies phasellus; senectus adipiscing. Nisl ad gravida ad rutrum suspendisse curabitur duis aliquet. Eros feugiat eget euismod interdum congue orci aptent nullam. Nam hac aenean conubia accumsan aliquet turpis vivamus nam.
 
 Suscipit risus dis faucibus pulvinar nostra pharetra finibus volutpat sapien. Aliquam fames leo dolor rhoncus interdum. Montes maximus eget fermentum mi blandit lacus habitasse pretium aenean. Risus dignissim cursus laoreet lacinia; neque hendrerit libero efficitur. Luctus odio scelerisque eros id luctus elementum nec nibh. Maecenas aenean auctor dis per iaculis. Dignissim nibh tincidunt curae aenean velit vel lacus eu.
 
@@ -270,10 +275,10 @@ if __name__ == '__main__':
   logger.debug("starting")
 
   stego = StegoImage('.\\test-data\\image.png')
-  # stego.clean_image()
-  stego.write_text('DEBUG_TEXT')
+  stego.clean_image()
+  stego.write_text(DEBUG_TEXT)
   stego.preview.show()
   stego.extract_meta()
   # print(stego.read_text())
-  assert stego.read_text() == 'DEBUG_TEXT'
+  assert stego.read_text() == DEBUG_TEXT
   stego.save_image()
