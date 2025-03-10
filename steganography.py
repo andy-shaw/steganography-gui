@@ -215,6 +215,8 @@ class StegoImage:
     meta = meta.split(';')
 
     self.meta['version'] = meta[0]
+    self.meta['num_bits'] = int(meta[1])
+    self.meta['encoding'] = meta[2]
     self.num_bits = int(meta[1])
     self.encoding = meta[2]
 
@@ -277,8 +279,9 @@ if __name__ == '__main__':
   stego = StegoImage('.\\test-data\\image.png')
   stego.clean_image()
   stego.write_text(DEBUG_TEXT)
-  stego.preview.show()
+  # stego.preview.show()
   stego.extract_meta()
+  print(stego.meta)
   # print(stego.read_text())
   assert stego.read_text() == DEBUG_TEXT
   stego.save_image()
